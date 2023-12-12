@@ -1,0 +1,54 @@
+name: "Backend CodeQL"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - $default-branch
+      - $protected-branches
+    paths:
+      - "backend/**"
+  pull_request:
+    branches:
+      - $default-branch
+      - $protected-branches
+    paths:
+      - "backend/**"
+
+defaults:
+  run:
+    shell: bash
+    working-directory: "./backend"
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    timeout-minutes: ${{ (matrix.language == 'swift' && 120 || 360 )}}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - $detected-codeql-language
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{ matrix.language }}"
