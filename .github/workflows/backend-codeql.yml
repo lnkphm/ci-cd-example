@@ -23,6 +23,11 @@ on:
     paths:
       - "backend/**"
 
+defaults:
+  run:
+    shell: bash
+    working-directory: "./backend"
+
 jobs:
   analyze:
     name: Analyze
